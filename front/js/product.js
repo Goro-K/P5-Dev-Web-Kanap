@@ -7,5 +7,5 @@ async function listId() {
     // Récuperation de la liste des produits avec la méthode fetch
     const response = await fetch("http://localhost:3000/api/products/_id")
     const products = await response.json()
-    return products
+    return products 
 }
