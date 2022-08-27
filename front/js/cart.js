@@ -10,7 +10,7 @@ for(const product of cart) {
   const prd = await response.json()
 
     document.querySelector('#cart__items').innerHTML += 
-      `<article class="cart__item" id="${product.id}" color="${product.color}">
+      `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
           <div class="cart__item__img">
             <img src="${prd.imageUrl}" alt="${prd.altTxt}">
           </div>
@@ -63,8 +63,8 @@ async function getTotalPrice() {
 
 function getTotalQuantity(elHtml) {
   totalQuantity = 0
+  document.querySelector("#totalQuantity").innerHTML = totalQuantity;
   cart.forEach(itemQty => {
-    document.querySelector(`.cart__item[data-id="${itemQty.id}"][data-color="${itemQty.color}"]`).remove()
     totalQuantity = totalQuantity + itemQty.quantity
     document.querySelector("#totalQuantity").innerHTML = totalQuantity;
     })
@@ -100,7 +100,11 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
     const dataColor = dltQty.getAttribute("data-color")
     const cartIndex = cart.findIndex(cartIndex => cartIndex.color == dataColor && cartIndex.id == dataId)
     const cartSplice = cart.splice(cartIndex, 1) 
-
+/*
+    // Suppression de l'html du produit ciblé 
+    const elementDelete = document.querySelector(`.cart__item [data-id="${dataId}"] [data-color="${dataColor}"]`);
+    elementDelete.remove()
+*/
     // suppression du produit dans le localStorage
     const panierString = JSON.stringify(cart)
     localStorage.setItem("products", panierString)
@@ -138,9 +142,8 @@ errorMsgNumber("city")
 // Erreur Adresse
 
 document.querySelector(`#address`).addEventListener('input', function(e) {
-  var regName = /^[a-zA-Z\s1-9]+$/;
-  var name = e.target.value;
-  if(!regName.test(name.trim())) {
+  var regName = /^[a-zA-Z\s0-9]+$/
+  if(!regName.test(e.target.value.trim())) {
     document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
     return false
   } else {
@@ -152,8 +155,8 @@ document.querySelector(`#address`).addEventListener('input', function(e) {
 
 document.querySelector(`#email`).addEventListener('input', function(e) {
   var regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  if(!regName.test(e.target.value)) {
-    document.querySelector(`#emailErrorMsg`).innerHTML = "You have entered an invalid email address!"
+  if(!regName.test(e.target.value.trim())) {
+    document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
     return false
   } else {
       return true
