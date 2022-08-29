@@ -40,52 +40,55 @@ for(const product of cart) {
     totalPrice = totalPrice + prd.price * product.quantity
 };
 
+// Modification du prix et quantité quand la page est recharger
+
 document.querySelector("#totalPrice").innerHTML = totalPrice;
 document.querySelector("#totalQuantity").innerHTML = totalQuantity;
 
+// Fonction qui permet la modification du prix totale à la modification/suppression d'un produit
 async function getTotalPrice() {
-  const productQuantity = document.querySelectorAll(".itemQuantity")
-  let totalPrice = 0;
-
-    productQuantity.forEach(async (quantity) => {
-    const dataId = quantity.getAttribute("data-id")
-    const response = await fetch(`http://localhost:3000/api/products/${dataId}`)
+  totalPrice = 0;
+  document.querySelector("#totalPrice").innerHTML = totalPrice
+  cart.forEach(async (item) => {
+    const response = await fetch(`http://localhost:3000/api/products/${item.id}`)
     const product = await response.json()
 
-    const QuantityParsed = parseInt(quantity.value)
-
-    totalPrice = totalPrice + product.price * QuantityParsed
+    totalPrice = totalPrice + product.price * item.quantity
 
     document.querySelector("#totalPrice").innerHTML = totalPrice;
     return
   })
 }
 
-function getTotalQuantity(elHtml) {
+// Fonction qui permet la modification de la quantité totale à la modification/suppression d'un produit
+
+function getTotalQuantity() {
   totalQuantity = 0
   document.querySelector("#totalQuantity").innerHTML = totalQuantity;
-  cart.forEach(itemQty => {
-    totalQuantity = totalQuantity + itemQty.quantity
+  cart.forEach(item => {
+    totalQuantity = totalQuantity + item.quantity
     document.querySelector("#totalQuantity").innerHTML = totalQuantity;
     })
   }
 
-  /// modification du produit sur la page
-  document.querySelectorAll(".itemQuantity").forEach(itemQty => {
-    itemQty.addEventListener("change", function () {
-      const itemQuantity = itemQty
-      const itemQuantityParsed = parseInt(itemQuantity.value)
-      const dataId = itemQty.getAttribute("data-id")
-      const dataColor = itemQty.getAttribute("data-color")
-      const productFound = cart.find(prd => prd.id == dataId && prd.color == dataColor)
-      productFound.quantity = itemQuantityParsed
+// modification du produit sur la page
 
-      // modification du produit sur le Local Storage
-      const panierString = JSON.stringify(cart)
-      localStorage.setItem("products", panierString)
+document.querySelectorAll(".itemQuantity").forEach(itemQty => {
+  itemQty.addEventListener("change", function () {
+    const itemQuantity = itemQty
+    const itemQuantityParsed = parseInt(itemQuantity.value)
+    const dataId = itemQty.getAttribute("data-id")
+    const dataColor = itemQty.getAttribute("data-color")
+    const productFound = cart.find(prd => prd.id == dataId && prd.color == dataColor)
+    productFound.quantity = itemQuantityParsed
 
-      // modification du prix/quantité totale 
-      getTotalQuantity("itemQuantity")
+    // modification du produit sur le Local Storage
+    const panierString = JSON.stringify(cart)
+    localStorage.setItem("products", panierString)
+
+    // modification du prix/quantité totale 
+    getTotalQuantity()
+    getTotalPrice()
   })
 })
 
@@ -100,18 +103,20 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
     const dataColor = dltQty.getAttribute("data-color")
     const cartIndex = cart.findIndex(cartIndex => cartIndex.color == dataColor && cartIndex.id == dataId)
     const cartSplice = cart.splice(cartIndex, 1) 
-/*
+
     // Suppression de l'html du produit ciblé 
-    const elementDelete = document.querySelector(`.cart__item [data-id="${dataId}"] [data-color="${dataColor}"]`);
+    const elementDelete = document.querySelector(`.cart__item[data-id="${dataId}"][data-color="${dataColor}"]`);
     elementDelete.remove()
-*/
+
     // suppression du produit dans le localStorage
     const panierString = JSON.stringify(cart)
     localStorage.setItem("products", panierString)
 
     // modification du prix/quantité totale
     
-    getTotalQuantity("deleteItem")
+    getTotalQuantity()
+    getTotalPrice()
+
   })
 })
 
@@ -170,7 +175,7 @@ const form = document.querySelector(".cart__order__form")
 form.addEventListener('submit', async function(e) {
   e.preventDefault();
 
-  // Constituer un tableau de produit
+// Constituer un tableau de produit
   const products = cart.map(product => product.id)
 
   const contact = {
