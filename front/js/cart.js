@@ -45,7 +45,8 @@ for(const product of cart) {
 document.querySelector("#totalPrice").innerHTML = totalPrice;
 document.querySelector("#totalQuantity").innerHTML = totalQuantity;
 
-// Fonction qui permet la modification du prix totale à la modification/suppression d'un produit
+// Fonction qui permet la modification du PRIX totale à la modification/suppression d'un produit
+
 async function getTotalPrice() {
   totalPrice = 0;
   document.querySelector("#totalPrice").innerHTML = totalPrice
@@ -60,7 +61,7 @@ async function getTotalPrice() {
   })
 }
 
-// Fonction qui permet la modification de la quantité totale à la modification/suppression d'un produit
+// Fonction qui permet la modification de la QUANTITE totale à la modification/suppression d'un produit
 
 function getTotalQuantity() {
   totalQuantity = 0
@@ -77,8 +78,9 @@ document.querySelectorAll(".itemQuantity").forEach(itemQty => {
   itemQty.addEventListener("change", function () {
     const itemQuantity = itemQty
     const itemQuantityParsed = parseInt(itemQuantity.value)
-    const dataId = itemQty.getAttribute("data-id")
-    const dataColor = itemQty.getAttribute("data-color")
+    const product = itemQty.closest('article')
+    const dataId = product.getAttribute("data-id")
+    const dataColor = product.getAttribute("data-color")
     const productFound = cart.find(prd => prd.id == dataId && prd.color == dataColor)
     productFound.quantity = itemQuantityParsed
 
@@ -99,18 +101,18 @@ document.querySelectorAll(".itemQuantity").forEach(itemQty => {
 
 document.querySelectorAll(".deleteItem").forEach(dltQty => {
   dltQty.addEventListener("click", function() {
-    const dataId = dltQty.getAttribute("data-id")
-    const dataColor = dltQty.getAttribute("data-color")
+    const product = dltQty.closest('article')
+    const dataId = product.getAttribute("data-id")
+    const dataColor = product.getAttribute("data-color")
     const cartIndex = cart.findIndex(cartIndex => cartIndex.color == dataColor && cartIndex.id == dataId)
     const cartSplice = cart.splice(cartIndex, 1) 
-
-    // Suppression de l'html du produit ciblé 
-    const elementDelete = document.querySelector(`.cart__item[data-id="${dataId}"][data-color="${dataColor}"]`);
-    elementDelete.remove()
 
     // suppression du produit dans le localStorage
     const panierString = JSON.stringify(cart)
     localStorage.setItem("products", panierString)
+
+    // Suppression de l'html du produit ciblé 
+    product.remove()
 
     // modification du prix/quantité totale
     
@@ -122,51 +124,55 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
 
 
 
-// Message d'erreur Formulaire
+// Message d'erreur Formulaire 
 
 
 // Fonction Erreur Prénom/Nom/Ville
 
 function errorMsgNumber(form) {
   document.querySelector(`#${form}`).addEventListener('input', function(e) {
-    var regName = /^[a-zA-Z\s]+$/;
-    var name = e.target.value;
-    if(!regName.test(name.trim())) {
-      document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
-      return false
+    const regName = /^[a-zA-Z\s]+$/;
+    if(regName.test(e.target.value.trim())) {
+      return true
     } else {
-        return true
-    }
+        document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
+        // Sa validité passe en False //
+        return false
+      }
   } 
 )}
 
-errorMsgNumber("lastName")
 errorMsgNumber("firstName")
+errorMsgNumber("lastName")
 errorMsgNumber("city")
 
 // Erreur Adresse
 
+function errorAddress() {
 document.querySelector(`#address`).addEventListener('input', function(e) {
-  var regName = /^[a-zA-Z\s0-9]+$/
-  if(!regName.test(e.target.value.trim())) {
-    document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
-    return false
+  const regName = /^[a-zA-Z\s0-9]+$/
+  if(regName.test(e.target.value.trim())) {
+    return true
   } else {
-      return true
-  }
+      document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
+      return false
+      }
 })
+}
 
 // Erreur Email
 
-document.querySelector(`#email`).addEventListener('input', function(e) {
-  var regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  if(!regName.test(e.target.value.trim())) {
-    document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
-    return false
-  } else {
-      return true
-  }
-})
+function errorEmail() {
+  document.querySelector(`#email`).addEventListener('input', function(e) {
+    const regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+      if(regName.test(e.target.value.trim())) {
+        return true
+      } else {
+          document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
+          return false
+      }
+    })
+}
 
 // Constituer un objet contact (à partir des données du formulaire) 
 
@@ -189,8 +195,22 @@ form.addEventListener('submit', async function(e) {
     }
   };
 
+  // Verification des erreurs dans le formulaire au clic sur le bouton Commander !
+  const isValidFirstName = errorMsgNumber("firstName")
+  const isValidLastName = errorMsgNumber("lastName")
+  const isValidAddress = errorAddress()
+  const isValidCity = errorMsgNumber("city")
+  const isValidEmail = errorEmail();
+
+  let isFormValid = isValidFirstName && isValidLastName && isValidAddress && isValidCity && isValidEmail;
+
+  if(isFormValid == true) {
+    alert("Il y a une erreur dans le formulaire")
+    return false
+  }
 
 // Requete POST sur API 
+
   const response = await fetch(`http://localhost:3000/api/products/order`, {
     method: 'POST',
     headers: {
@@ -199,8 +219,10 @@ form.addEventListener('submit', async function(e) {
     },
     body: JSON.stringify(contact),
   })
+
   const prd = await response.json()
-  return prd
+
+  document.querySelector(`.cart__order__form__submit`).innerHTML = `<a href= "confirmation.html?orderId=${prd.orderId}"><input type="submit" value="Commander !" id="order"></a>`
 })
 
 
