@@ -1,24 +1,28 @@
 // on recupere la liste des produits dans le panier et on la transforme pour recuperer un Array
+const products = new Map()
+
 let cart = JSON.parse(localStorage.getItem("products"));
 
 let totalQuantity = 0; // A chaque boucle les quantités s'additionnent
 
 let totalPrice = 0; // A chaque boucle les prix s'additionnent
 
+
 for(const product of cart) {
   const response = await fetch(`http://localhost:3000/api/products/${product.id}`) // on veut faire un fetch pour chaque id recuperer
-  const prd = await response.json()
+  const productApi = await response.json()
+  products.set(productApi._id, productApi)
 
     document.querySelector('#cart__items').innerHTML += 
       `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
           <div class="cart__item__img">
-            <img src="${prd.imageUrl}" alt="${prd.altTxt}">
+            <img src="${productApi.imageUrl}" alt="${productApi.altTxt}">
           </div>
           <div class="cart__item__content">
             <div class="cart__item__content__description">
-              <h2>${prd.name}</h2>
+              <h2>${productApi.name}</h2>
               <p>${product.color}</p>
-              <p>${prd.price}</p>
+              <p>${productApi.price}</p>
             </div>
             <div class="cart__item__content__settings">
               <div class="cart__item__content__settings__quantity">
@@ -37,7 +41,7 @@ for(const product of cart) {
 
     // La totalité des prix de la boucle doivent s'additionner pour donner la quantité total
 
-    totalPrice = totalPrice + prd.price * product.quantity
+    totalPrice = totalPrice + productApi.price * product.quantity
 };
 
 // Modification du prix et quantité quand la page est recharger
@@ -47,30 +51,26 @@ document.querySelector("#totalQuantity").innerHTML = totalQuantity;
 
 // Fonction qui permet la modification du PRIX totale à la modification/suppression d'un produit
 
-async function getTotalPrice() {
+function getTotalPrice() {
   totalPrice = 0;
   document.querySelector("#totalPrice").innerHTML = totalPrice
-  cart.forEach(async (item) => {
-    const response = await fetch(`http://localhost:3000/api/products/${item.id}`)
-    const product = await response.json()
+  cart.forEach(item => {
+    const productFromApi = products.get(productApi)
 
-    totalPrice = totalPrice + product.price * item.quantity
-
-    document.querySelector("#totalPrice").innerHTML = totalPrice;
-    return
+    totalPrice = totalPrice + productFromApi.price * item.quantity
   })
+  document.querySelector("#totalPrice").innerHTML = totalPrice; // Si j'utilise new Map()le mettre à la fin de la boucle forEach()
 }
 
 // Fonction qui permet la modification de la QUANTITE totale à la modification/suppression d'un produit
 
 function getTotalQuantity() {
   totalQuantity = 0
-  document.querySelector("#totalQuantity").innerHTML = totalQuantity;
   cart.forEach(item => {
     totalQuantity = totalQuantity + item.quantity
-    document.querySelector("#totalQuantity").innerHTML = totalQuantity;
-    })
-  }
+  })
+  document.querySelector("#totalQuantity").innerHTML = totalQuantity;
+}
 
 // modification du produit sur la page
 
@@ -128,51 +128,63 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
 
 
 // Fonction Erreur Prénom/Nom/Ville
+function errorMsgNumber(value, form) {
+  const regName = /^[a-zA-Z\s]+$/;
+  if(regName.test(value.trim())) {
+    return true
+  } else {
+      document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
+      return false
+    }
+} 
 
-function errorMsgNumber(form) {
-  document.querySelector(`#${form}`).addEventListener('input', function(e) {
-    const regName = /^[a-zA-Z\s]+$/;
-    if(regName.test(e.target.value.trim())) {
-      return true
-    } else {
-        document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
-        // Sa validité passe en False //
-        return false
-      }
-  } 
-)}
+document.querySelector(`#firstName`).addEventListener('input', function(e) {
+  errorMsgNumber(e.target.value, "firstName")
+})
 
-errorMsgNumber("firstName")
-errorMsgNumber("lastName")
-errorMsgNumber("city")
+document.querySelector(`#lastName`).addEventListener('input', function(e) {
+  errorMsgNumber(e.target.value, "lastName")
+})
+
+document.querySelector(`#city`).addEventListener('input', function(e) {
+  errorMsgNumber(e.target.value, "city")
+})
+
+
 
 // Erreur Adresse
 
-function errorAddress() {
-document.querySelector(`#address`).addEventListener('input', function(e) {
+function errorMsgAddress(value) {
   const regName = /^[a-zA-Z\s0-9]+$/
-  if(regName.test(e.target.value.trim())) {
+  if(regName.test(value.trim())) {
     return true
   } else {
       document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
       return false
-      }
-})
+    }
 }
+
+document.querySelector(`#address`).addEventListener('input', function(e) {
+  errorMsgAddress(e.target.value)
+})
+
 
 // Erreur Email
 
-function errorEmail() {
-  document.querySelector(`#email`).addEventListener('input', function(e) {
-    const regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-      if(regName.test(e.target.value.trim())) {
-        return true
-      } else {
-          document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
-          return false
-      }
-    })
+function errorMsgEmail(value) {
+  const regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  if(regName.test(value.trim())) {
+    return true
+  } else {
+      document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
+      return false
+    }
 }
+
+document.querySelector(`#email`).addEventListener('input', function(e) {
+  errorMsgEmail(e.target.value)
+})
+
 
 // Constituer un objet contact (à partir des données du formulaire) 
 
@@ -196,17 +208,17 @@ form.addEventListener('submit', async function(e) {
   };
 
   // Verification des erreurs dans le formulaire au clic sur le bouton Commander !
-  const isValidFirstName = errorMsgNumber("firstName")
-  const isValidLastName = errorMsgNumber("lastName")
-  const isValidAddress = errorAddress()
-  const isValidCity = errorMsgNumber("city")
-  const isValidEmail = errorEmail();
+  const isValidFirstName = errorMsgNumber(e.target.firstName.value, "firstName")
+  const isValidLastName = errorMsgNumber(e.target.lastName.value, "lastName")
+  const isValidCity = errorMsgNumber(e.target.city.value, "city")
+  const isValidAddress = errorMsgAddress(e.target.city.value)
+  const isValidEmail = errorMsgEmail(e.target.email.value)
 
   let isFormValid = isValidFirstName && isValidLastName && isValidAddress && isValidCity && isValidEmail;
 
-  if(isFormValid == true) {
+  if(isFormValid == false) {
     alert("Il y a une erreur dans le formulaire")
-    return false
+    return
   }
 
 // Requete POST sur API 
@@ -222,7 +234,7 @@ form.addEventListener('submit', async function(e) {
 
   const prd = await response.json()
 
-  document.querySelector(`.cart__order__form__submit`).innerHTML = `<a href= "confirmation.html?orderId=${prd.orderId}"><input type="submit" value="Commander !" id="order"></a>`
+  window.location = `confirmation.html?orderId=${prd.orderId}`
 })
 
 
@@ -244,4 +256,28 @@ const promises = cart.map(async (product) => {
 
 
 await Promise.all(promises)
+*/
+
+/*
+const products = new Map()
+
+
+for((product) ){
+
+    const product = fetch()
+    products.set(product.id, product)
+
+})
+
+
+
+
+ 123: { id: 123, price: 10},
+ 456: { id: 456, price: 10},
+
+
+
+
+const productFromApi = products.get(product.id)
+productFromApl.price
 */
