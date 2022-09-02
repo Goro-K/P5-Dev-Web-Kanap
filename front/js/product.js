@@ -27,7 +27,6 @@ prd.colors.forEach(color => {
 // Au clic du bouton 'Ajouter au panier' on crée un objet qui possède 
 // une quantité, une couleur et un ID
 document.querySelector("#addToCart").addEventListener("click", function() {
-    
     const color = document.querySelector("#colors")
     const quantity = document.querySelector("#quantity")
     const quantityParsed = parseInt(`${quantity.value}`)
@@ -73,6 +72,10 @@ document.querySelector("#addToCart").addEventListener("click", function() {
         productFound.quantity = productFound.quantity + quantityParsed;
     }
 
+    // On ajoute un message pour indiquer que le produit est bien ajouter au panier
+
+    alert("Votre produit a bien été rajouté au panier")
+    
     // On a un panier avec un nouveau produit ou une quantité en plus, on la remet sous forme chaine de caractere et on l'ajoute au localStorage
     panierString = JSON.stringify(panier) 
     localStorage.setItem("products", panierString)

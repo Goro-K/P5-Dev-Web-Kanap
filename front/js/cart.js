@@ -11,7 +11,7 @@ let totalPrice = 0; // A chaque boucle les prix s'additionnent
 for(const product of cart) {
   const response = await fetch(`http://localhost:3000/api/products/${product.id}`) // on veut faire un fetch pour chaque id recuperer
   const productApi = await response.json()
-  products.set(productApi._id, productApi)
+  products.set(product.id, productApi)
 
     document.querySelector('#cart__items').innerHTML += 
       `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
@@ -55,11 +55,10 @@ function getTotalPrice() {
   totalPrice = 0;
   document.querySelector("#totalPrice").innerHTML = totalPrice
   cart.forEach(item => {
-    const productFromApi = products.get(productApi)
-
+    const productFromApi = products.get(item.id)
     totalPrice = totalPrice + productFromApi.price * item.quantity
   })
-  document.querySelector("#totalPrice").innerHTML = totalPrice; // Si j'utilise new Map()le mettre à la fin de la boucle forEach()
+  document.querySelector("#totalPrice").innerHTML = totalPrice; 
 }
 
 // Fonction qui permet la modification de la QUANTITE totale à la modification/suppression d'un produit
@@ -131,6 +130,7 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
 function errorMsgNumber(value, form) {
   const regName = /^[a-zA-Z\s]+$/;
   if(regName.test(value.trim())) {
+    document.querySelector(`#${form}ErrorMsg`).innerHTML = ""
     return true
   } else {
       document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
@@ -157,6 +157,7 @@ document.querySelector(`#city`).addEventListener('input', function(e) {
 function errorMsgAddress(value) {
   const regName = /^[a-zA-Z\s0-9]+$/
   if(regName.test(value.trim())) {
+    document.querySelector(`#addressErrorMsg`).innerHTML = ""
     return true
   } else {
       document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
@@ -174,6 +175,7 @@ document.querySelector(`#address`).addEventListener('input', function(e) {
 function errorMsgEmail(value) {
   const regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   if(regName.test(value.trim())) {
+    document.querySelector(`#emailErrorMsg`).innerHTML = ""
     return true
   } else {
       document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
