@@ -8,13 +8,13 @@ let totalQuantity = 0; // A chaque boucle les quantités s'additionnent
 let totalPrice = 0; // A chaque boucle les prix s'additionnent
 
 
-for(const product of cart) {
+for (const product of cart) {
   const response = await fetch(`http://localhost:3000/api/products/${product.id}`) // on veut faire un fetch pour chaque id recuperer
   const productApi = await response.json()
   products.set(product.id, productApi)
 
-    document.querySelector('#cart__items').innerHTML += 
-      `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
+  document.querySelector('#cart__items').innerHTML +=
+    `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
           <div class="cart__item__img">
             <img src="${productApi.imageUrl}" alt="${productApi.altTxt}">
           </div>
@@ -36,12 +36,12 @@ for(const product of cart) {
           </div>
         </article>`;
 
-    /// la totalité des quantité de la boucle doivent s'additionner pour donner la quantité total
-    totalQuantity = totalQuantity + product.quantity
+  /// la totalité des quantité de la boucle doivent s'additionner pour donner la quantité total
+  totalQuantity = totalQuantity + product.quantity
 
-    // La totalité des prix de la boucle doivent s'additionner pour donner la quantité total
+  // La totalité des prix de la boucle doivent s'additionner pour donner la quantité total
 
-    totalPrice = totalPrice + productApi.price * product.quantity
+  totalPrice = totalPrice + productApi.price * product.quantity
 };
 
 // Modification du prix et quantité quand la page est recharger
@@ -58,7 +58,7 @@ function getTotalPrice() {
     const productFromApi = products.get(item.id)
     totalPrice = totalPrice + productFromApi.price * item.quantity
   })
-  document.querySelector("#totalPrice").innerHTML = totalPrice; 
+  document.querySelector("#totalPrice").innerHTML = totalPrice;
 }
 
 // Fonction qui permet la modification de la QUANTITE totale à la modification/suppression d'un produit
@@ -99,12 +99,12 @@ document.querySelectorAll(".itemQuantity").forEach(itemQty => {
 // Suppression du produit
 
 document.querySelectorAll(".deleteItem").forEach(dltQty => {
-  dltQty.addEventListener("click", function() {
+  dltQty.addEventListener("click", function () {
     const product = dltQty.closest('article')
     const dataId = product.getAttribute("data-id")
     const dataColor = product.getAttribute("data-color")
     const cartIndex = cart.findIndex(cartIndex => cartIndex.color == dataColor && cartIndex.id == dataId)
-    const cartSplice = cart.splice(cartIndex, 1) 
+    const cartSplice = cart.splice(cartIndex, 1)
 
     // suppression du produit dans le localStorage
     const panierString = JSON.stringify(cart)
@@ -114,7 +114,7 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
     product.remove()
 
     // modification du prix/quantité totale
-    
+
     getTotalQuantity()
     getTotalPrice()
 
@@ -129,24 +129,24 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
 // Fonction Erreur Prénom/Nom/Ville
 function errorMsgNumber(value, form) {
   const regName = /^[a-zA-Z\s]+$/;
-  if(regName.test(value.trim())) {
+  if (regName.test(value.trim())) {
     document.querySelector(`#${form}ErrorMsg`).innerHTML = ""
     return true
   } else {
-      document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
-      return false
-    }
-} 
+    document.querySelector(`#${form}ErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z]`
+    return false
+  }
+}
 
-document.querySelector(`#firstName`).addEventListener('input', function(e) {
+document.querySelector(`#firstName`).addEventListener('input', function (e) {
   errorMsgNumber(e.target.value, "firstName")
 })
 
-document.querySelector(`#lastName`).addEventListener('input', function(e) {
+document.querySelector(`#lastName`).addEventListener('input', function (e) {
   errorMsgNumber(e.target.value, "lastName")
 })
 
-document.querySelector(`#city`).addEventListener('input', function(e) {
+document.querySelector(`#city`).addEventListener('input', function (e) {
   errorMsgNumber(e.target.value, "city")
 })
 
@@ -156,16 +156,16 @@ document.querySelector(`#city`).addEventListener('input', function(e) {
 
 function errorMsgAddress(value) {
   const regName = /^[a-zA-Z\s0-9]+$/
-  if(regName.test(value.trim())) {
+  if (regName.test(value.trim())) {
     document.querySelector(`#addressErrorMsg`).innerHTML = ""
     return true
   } else {
-      document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
-      return false
-    }
+    document.querySelector(`#addressErrorMsg`).innerHTML = `Les caractères acceptées sont [a-z A-Z 1-9]`
+    return false
+  }
 }
 
-document.querySelector(`#address`).addEventListener('input', function(e) {
+document.querySelector(`#address`).addEventListener('input', function (e) {
   errorMsgAddress(e.target.value)
 })
 
@@ -174,16 +174,16 @@ document.querySelector(`#address`).addEventListener('input', function(e) {
 
 function errorMsgEmail(value) {
   const regName = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-  if(regName.test(value.trim())) {
+  if (regName.test(value.trim())) {
     document.querySelector(`#emailErrorMsg`).innerHTML = ""
     return true
   } else {
-      document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
-      return false
-    }
+    document.querySelector(`#emailErrorMsg`).innerHTML = "Vous avez entré une adresse mail invalide"
+    return false
+  }
 }
 
-document.querySelector(`#email`).addEventListener('input', function(e) {
+document.querySelector(`#email`).addEventListener('input', function (e) {
   errorMsgEmail(e.target.value)
 })
 
@@ -192,20 +192,20 @@ document.querySelector(`#email`).addEventListener('input', function(e) {
 
 const form = document.querySelector(".cart__order__form")
 
-form.addEventListener('submit', async function(e) {
+form.addEventListener('submit', async function (e) {
   e.preventDefault();
 
-// Constituer un tableau de produit
+  // Constituer un tableau de produit
   const products = cart.map(product => product.id)
 
   const contact = {
     products,
-    contact : {    
-      firstName : e.target.firstName.value,
-      lastName : e.target.lastName.value,
-      address : e.target.address.value,
-      city : e.target.city.value,
-      email : e.target.email.value,
+    contact: {
+      firstName: e.target.firstName.value,
+      lastName: e.target.lastName.value,
+      address: e.target.address.value,
+      city: e.target.city.value,
+      email: e.target.email.value,
     }
   };
 
@@ -218,12 +218,12 @@ form.addEventListener('submit', async function(e) {
 
   let isFormValid = isValidFirstName && isValidLastName && isValidAddress && isValidCity && isValidEmail;
 
-  if(isFormValid == false) {
+  if (isFormValid == false) {
     alert("Il y a une erreur dans le formulaire")
     return
   }
 
-// Requete POST sur API 
+  // Requete POST sur API 
 
   const response = await fetch(`http://localhost:3000/api/products/order`, {
     method: 'POST',
@@ -238,48 +238,3 @@ form.addEventListener('submit', async function(e) {
 
   window.location = `confirmation.html?orderId=${prd.orderId}`
 })
-
-
-
-
-/*
-const promises = cart.map(async (product) => {
-    // await fetch()
-    // product.quantity =   10  product.price = 1000
-    
-     sum = sum + product.price * product.quantity
-  
-     sum = 210 + 1000 * 10
-     sum = 210 + 10000
-     sum = 10210
-})
-
-// promises = [Promise1, Promese2, Promese3]
-
-
-await Promise.all(promises)
-*/
-
-/*
-const products = new Map()
-
-
-for((product) ){
-
-    const product = fetch()
-    products.set(product.id, product)
-
-})
-
-
-
-
- 123: { id: 123, price: 10},
- 456: { id: 456, price: 10},
-
-
-
-
-const productFromApi = products.get(product.id)
-productFromApl.price
-*/
