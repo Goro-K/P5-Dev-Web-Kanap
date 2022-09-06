@@ -26,27 +26,27 @@ prd.colors.forEach(color => {
 
 // Au clic du bouton 'Ajouter au panier' on crée un objet qui possède 
 // une quantité, une couleur et un ID
-document.querySelector("#addToCart").addEventListener("click", function() {
+document.querySelector("#addToCart").addEventListener("click", function () {
     const color = document.querySelector("#colors")
     const quantity = document.querySelector("#quantity")
-    const quantityParsed = parseInt(`${quantity.value}`)
+    const quantityParsed = parseInt(quantity.value)
     const product = {
-        id : id,
-        color : color.value,
-        quantity : quantityParsed
+        id: id,
+        color: color.value,
+        quantity: quantityParsed
     }
 
     // Si la quantité est = 0 on veut un message d'erreur
-    
+
     // Quantité
-    if(quantityParsed == 0){
+    if (quantityParsed <= 0) {
         alert("Veuillez choisir une quantité")
         return
     }
     // Si la couleur n'a pas été choisie on veut un message d'erreur
 
     // Couleur
-    if(color.value == "") {
+    if (color.value == "") {
         alert("Veuillez choisir une couleur")
         return
     }
@@ -58,7 +58,7 @@ document.querySelector("#addToCart").addEventListener("click", function() {
     let panier = JSON.parse(panierString)
 
     // Si le localStorage est vide on crée un Array(vide)
-    if(panier === null) {
+    if (panier === null) {
         panier = [];
     }
 
@@ -66,7 +66,7 @@ document.querySelector("#addToCart").addEventListener("click", function() {
     let productFound = panier.find(prd => prd.id == product.id && prd.color == product.color)
 
 
-    if(productFound == undefined) {     // Si le produit n'a pas été retrouvé, il n'est pas dans le panier
+    if (productFound == undefined) {     // Si le produit n'a pas été retrouvé, il n'est pas dans le panier
         panier.push(product);           //Dans ce cas on l'ajoute au panier
     } else {                            // S'il a été retrouvé, il aura une valeur déja défini, on augmentera donc sa quantité
         productFound.quantity = productFound.quantity + quantityParsed;
@@ -75,10 +75,10 @@ document.querySelector("#addToCart").addEventListener("click", function() {
     // On ajoute un message pour indiquer que le produit est bien ajouter au panier
 
     alert("Votre produit a bien été rajouté au panier")
-    
+
     // On a un panier avec un nouveau produit ou une quantité en plus, on la remet sous forme chaine de caractere et on l'ajoute au localStorage
-    panierString = JSON.stringify(panier) 
+    panierString = JSON.stringify(panier)
     localStorage.setItem("products", panierString)
-    
+
 })
 

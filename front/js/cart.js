@@ -3,11 +3,6 @@ const products = new Map()
 
 let cart = JSON.parse(localStorage.getItem("products"));
 
-let totalQuantity = 0; // A chaque boucle les quantités s'additionnent
-
-let totalPrice = 0; // A chaque boucle les prix s'additionnent
-
-
 for (const product of cart) {
   const response = await fetch(`http://localhost:3000/api/products/${product.id}`) // on veut faire un fetch pour chaque id recuperer
   const productApi = await response.json()
@@ -15,45 +10,38 @@ for (const product of cart) {
 
   document.querySelector('#cart__items').innerHTML +=
     `<article class="cart__item" data-id="${product.id}" data-color="${product.color}">
-          <div class="cart__item__img">
-            <img src="${productApi.imageUrl}" alt="${productApi.altTxt}">
+        <div class="cart__item__img">
+          <img src="${productApi.imageUrl}" alt="${productApi.altTxt}">
+        </div>
+        <div class="cart__item__content">
+          <div class="cart__item__content__description">
+            <h2>${productApi.name}</h2>
+            <p>${product.color}</p>
+            <p>${productApi.price}</p>
           </div>
-          <div class="cart__item__content">
-            <div class="cart__item__content__description">
-              <h2>${productApi.name}</h2>
-              <p>${product.color}</p>
-              <p>${productApi.price}</p>
+          <div class="cart__item__content__settings">
+            <div class="cart__item__content__settings__quantity">
+              <p>Qté : </p>
+              <input type="number" class="itemQuantity" data-id="${product.id}" data-color="${product.color}" name="itemQuantity" min="1" max="100" value="${product.quantity}">
             </div>
-            <div class="cart__item__content__settings">
-              <div class="cart__item__content__settings__quantity">
-                <p>Qté : </p>
-                <input type="number" class="itemQuantity" data-id="${product.id}" data-color="${product.color}" name="itemQuantity" min="1" max="100" value="${product.quantity}">
-              </div>
-              <div class="cart__item__content__settings__delete">
-                <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
-              </div>
+            <div class="cart__item__content__settings__delete">
+              <p class="deleteItem" data-id="${product.id}" data-color="${product.color}">Supprimer</p>
             </div>
           </div>
-        </article>`;
-
-  /// la totalité des quantité de la boucle doivent s'additionner pour donner la quantité total
-  totalQuantity = totalQuantity + product.quantity
-
-  // La totalité des prix de la boucle doivent s'additionner pour donner la quantité total
-
-  totalPrice = totalPrice + productApi.price * product.quantity
+        </div>
+      </article>`;
 };
 
 // Modification du prix et quantité quand la page est recharger
 
-document.querySelector("#totalPrice").innerHTML = totalPrice;
-document.querySelector("#totalQuantity").innerHTML = totalQuantity;
+getTotalPrice()
+getTotalQuantity()
 
 // Fonction qui permet la modification du PRIX totale à la modification/suppression d'un produit
 
 function getTotalPrice() {
-  totalPrice = 0;
-  document.querySelector("#totalPrice").innerHTML = totalPrice
+  let totalPrice = 0;
+
   cart.forEach(item => {
     const productFromApi = products.get(item.id)
     totalPrice = totalPrice + productFromApi.price * item.quantity
@@ -64,7 +52,7 @@ function getTotalPrice() {
 // Fonction qui permet la modification de la QUANTITE totale à la modification/suppression d'un produit
 
 function getTotalQuantity() {
-  totalQuantity = 0
+  let totalQuantity = 0
   cart.forEach(item => {
     totalQuantity = totalQuantity + item.quantity
   })
@@ -77,6 +65,10 @@ document.querySelectorAll(".itemQuantity").forEach(itemQty => {
   itemQty.addEventListener("change", function () {
     const itemQuantity = itemQty
     const itemQuantityParsed = parseInt(itemQuantity.value)
+    if(itemQuantityParsed <= 0){
+      alert("Veuillez choisir une quantité")
+      return
+  }
     const product = itemQty.closest('article')
     const dataId = product.getAttribute("data-id")
     const dataColor = product.getAttribute("data-color")
@@ -93,9 +85,6 @@ document.querySelectorAll(".itemQuantity").forEach(itemQty => {
   })
 })
 
-
-
-
 // Suppression du produit
 
 document.querySelectorAll(".deleteItem").forEach(dltQty => {
@@ -104,7 +93,7 @@ document.querySelectorAll(".deleteItem").forEach(dltQty => {
     const dataId = product.getAttribute("data-id")
     const dataColor = product.getAttribute("data-color")
     const cartIndex = cart.findIndex(cartIndex => cartIndex.color == dataColor && cartIndex.id == dataId)
-    const cartSplice = cart.splice(cartIndex, 1)
+    cart.splice(cartIndex, 1)
 
     // suppression du produit dans le localStorage
     const panierString = JSON.stringify(cart)
