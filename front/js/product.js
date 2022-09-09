@@ -39,10 +39,11 @@ document.querySelector("#addToCart").addEventListener("click", function () {
     // Si la quantité est = 0 on veut un message d'erreur
 
     // Quantité
-    if (quantityParsed <= 0) {
+    if (quantityParsed <= 0 || isNaN(quantityParsed)) {
         alert("Veuillez choisir une quantité")
         return
     }
+
     // Si la couleur n'a pas été choisie on veut un message d'erreur
 
     // Couleur

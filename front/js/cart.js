@@ -65,10 +65,10 @@ document.querySelectorAll(".itemQuantity").forEach(itemQty => {
   itemQty.addEventListener("change", function () {
     const itemQuantity = itemQty
     const itemQuantityParsed = parseInt(itemQuantity.value)
-    if(itemQuantityParsed <= 0){
+    if(itemQuantityParsed <= 0 || isNaN(itemQuantityParsed)){
       alert("Veuillez choisir une quantité")
       return
-  }
+    }
     const product = itemQty.closest('article')
     const dataId = product.getAttribute("data-id")
     const dataColor = product.getAttribute("data-color")
