@@ -187,6 +187,11 @@ form.addEventListener('submit', async function (e) {
   // Constituer un tableau de produit
   const products = cart.map(product => product.id)
 
+  if(products.length == 0) {
+    alert("Veuillez choisir un article")
+    return
+  }
+
   const contact = {
     products,
     contact: {
